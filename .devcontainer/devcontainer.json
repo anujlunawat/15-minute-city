@@ -1,0 +1,25 @@
+{
+  "name": "Fullstack Dev Container",
+  "build": {
+    "dockerfile": "Dockerfile"
+    // "context": ""
+  },
+  "forwardPorts": [
+    3000,
+    8000,
+    6379,
+    27017,
+    5432
+  ],
+  "postCreateCommand": "echo Dev container ready",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-azuretools.vscode-docker",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint"
+      ]
+    }
+  }
+}

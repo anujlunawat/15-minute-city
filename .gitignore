@@ -1,0 +1,14 @@
+accesibility.db
+/log.txt
+node_modules
+cache
+files/*
+!files/feather
+files/feather/*
+!files/gpkg
+files/gpkg/*
+!files/qgis
+files/qgis/*
+
+frontend/.env
+.env
