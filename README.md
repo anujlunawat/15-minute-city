@@ -123,8 +123,8 @@ A lot of time went into refining these aspects.
 
 ## References
 
-- Carlos Moreno — 15-minute city: https://www.carlosmoreno.com/15-minute-city
-- Paris initiative: https://www.paris.fr/pages/la-ville-du-quart-d-heure-19350
+- Carlos Moreno — 15-minute city: https://www.researchgate.net/publication/362839186_Definition_of_the_15-minute_city_WHAT_IS_THE_15-MINUTE_CITY
+- Paris initiative: https://www.paris.fr/dossiers/paris-ville-du-quart-d-heure-ou-le-pari-de-la-proximite-37
 - ChatGPT
 - DeepSeek (for brainstorming)
 
