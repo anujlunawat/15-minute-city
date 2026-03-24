@@ -125,7 +125,7 @@ A lot of time went into refining these aspects.
 
 - Carlos Moreno — 15-minute city: https://www.carlosmoreno.com/15-minute-city
 - Paris initiative: https://www.paris.fr/pages/la-ville-du-quart-d-heure-19350
-- Chatgpt (come on, who doesn't use this)
+- ChatGPT
 - DeepSeek (for brainstorming)
 
 ---
