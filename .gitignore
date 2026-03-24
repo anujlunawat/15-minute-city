@@ -2,13 +2,19 @@ accesibility.db
 /log.txt
 node_modules
 cache
-files/*
-!files/feather
-files/feather/*
-!files/gpkg
-files/gpkg/*
-!files/qgis
-files/qgis/*
+# files/*  # ignores all files
+# files/*/  # unignores all dir
+# !files/feather
+# files/feather/*
+# !files/gpkg
+# files/gpkg/*
+# !files/qgis
+# files/qgis/*
+
+# ignores everyting that inside (recursively)
+files/** 
+# reincludes all directories
+!files/**/  
 
 frontend/.env
 .env
