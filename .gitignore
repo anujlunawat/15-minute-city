@@ -11,10 +11,14 @@ cache
 # !files/qgis
 # files/qgis/*
 
-# ignores everyting that inside (recursively)
-files/** 
-# reincludes all directories
-!files/**/  
+# # ignores everyting that inside (recursively)
+# files/** 
+# # reincludes all directories
+# !files/**/  
+files/city_data.gpkg
 
 frontend/.env
 .env
+
+files/city_data.gpkg
+files/gpkg/isochrones.gpkg
