@@ -6,9 +6,9 @@
 files/ filter=lfs diff=lfs merge=lfs -text
 
 # feather files
-files/feather/isochrones/** filter=lfs diff=lfs merge=lfs -text
-files/feather/isochrones/isochrones_edges_base.feather -filter -diff -merge text
-files/feather/isochrones/isochrones_edges_base_proj.feather -filter -diff -merge text
+# files/feather/isochrones/** filter=lfs diff=lfs merge=lfs -text
+files/feather/isochrones/isochrones_edges_base.feather filter=lfs diff=lfs merge=lfs -text
+files/feather/isochrones/isochrones_edges_base_proj.feather filter=lfs diff=lfs merge=lfs -text
 files/feather/isochrones_edges.feather filter=lfs diff=lfs merge=lfs -text
 
 # gpkg files
