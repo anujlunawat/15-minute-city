@@ -1,32 +1,444 @@
+/* ── Design tokens ──────────────────────────────────────── */
 :root {
-  font-family: Arial, sans-serif;
+  --font-ui: "Inter", system-ui, sans-serif;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+
+  /* Dark-mode palette */
+  --bg-base: #0d1117;
+  --bg-surface: #161b22;
+  --bg-surface-2: #1c2128;
+  --bg-glass: rgba(22, 27, 34, 0.82);
+
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.15);
+
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #484f58;
+
+  --accent: #58a6ff;
+  --accent-glow: rgba(88, 166, 255, 0.25);
+
+  /* Score colours (mirrors backend) */
+  --score-0: #a50026;
+  --score-1: #d73027;
+  --score-2: #f46d43;
+  --score-3: #fdae61;
+  --score-4: #fee08b;
+  --score-5: #66bd63;
+  --score-6: #1a9850;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+
+  --shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.55), 0 0 0 1px var(--border);
+  --shadow-badge: 0 2px 8px rgba(0, 0, 0, 0.4);
+
+  --transition: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-* {
-  box-sizing: border-box;
-}
+/* ── Reset ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html,
-body,
-#root {
-  margin: 0;
+html, body, #root {
   width: 100%;
   height: 100%;
+  overflow: hidden;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
 }
 
+/* ── Layout ─────────────────────────────────────────────── */
 .app-container {
   display: flex;
   width: 100%;
   height: 100vh;
+  position: relative;
 }
 
-.sidebar {
-  width: 280px;
-  padding: 1rem;
-  background: #f7f7f7;
-  border-right: 1px solid #ddd;
-}
-
+/* ── Map ────────────────────────────────────────────────── */
 .leaflet-container {
   flex: 1;
+  height: 100%;
+  background: #0d1117;
+  cursor: crosshair;
+}
+
+/* Dark tile layer tint */
+.leaflet-tile { filter: brightness(0.85) saturate(0.9); }
+
+/* ── Overlay UI shell ───────────────────────────────────── */
+.ui-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 800;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+}
+
+/* ── Header bar ─────────────────────────────────────────── */
+.header-bar {
+  pointer-events: all;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 20px;
+  box-shadow: var(--shadow-panel);
+  width: fit-content;
+  max-width: 420px;
+}
+
+.header-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #1a9850 0%, #58a6ff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+  box-shadow: 0 0 12px rgba(26, 152, 80, 0.4);
+}
+
+.header-text h1 {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.header-text p {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* ── Bottom strip ───────────────────────────────────────── */
+.bottom-strip {
+  pointer-events: all;
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+/* ── Info panel ─────────────────────────────────────────── */
+.info-panel {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  box-shadow: var(--shadow-panel);
+  min-width: 260px;
+  max-width: 320px;
+  transition: opacity var(--transition), transform var(--transition);
+}
+
+.info-panel.hidden {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+.info-panel-hint {
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.info-panel-hint .pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse 2s infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 var(--accent-glow); }
+  50% { opacity: 0.8; transform: scale(1.2); box-shadow: 0 0 0 6px transparent; }
+}
+
+/* Info panel — result state */
+.info-result {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.info-result-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.score-badge {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 700;
+  color: #000;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-badge);
+  transition: background var(--transition);
+}
+
+.info-result-title {
+  flex: 1;
+}
+
+.info-result-title .label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.info-result-title .value {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.info-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.meta-chip {
+  background: var(--bg-surface-2);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.meta-chip span {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* ── Legend ─────────────────────────────────────────────── */
+.legend-panel {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-panel);
+}
+
+.legend-title {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.legend-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+/* ── Loading overlay ────────────────────────────────────── */
+.loading-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+  z-index: 1000;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ── Leaflet popup dark override ────────────────────────── */
+.leaflet-popup-content-wrapper {
+  background: var(--bg-surface) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-panel) !important;
+  font-family: var(--font-ui) !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--bg-surface) !important;
+}
+
+.leaflet-popup-content {
+  margin: 10px 14px !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+}
+
+.popup-score-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.popup-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.popup-label { color: var(--text-secondary); font-size: 11px; }
+.popup-val { color: var(--text-primary); font-weight: 600; }
+
+/* ── Leaflet zoom control ───────────────────────────────── */
+.leaflet-control-zoom a {
+  background: var(--bg-surface) !important;
+  color: var(--text-secondary) !important;
+  border-color: var(--border) !important;
+}
+.leaflet-control-zoom a:hover {
+  background: var(--bg-surface-2) !important;
+  color: var(--text-primary) !important;
+}
+
+.leaflet-control-attribution {
+  background: rgba(13, 17, 23, 0.7) !important;
+  color: var(--text-muted) !important;
+  font-size: 9px !important;
+}
+
+.leaflet-control-attribution a { color: var(--text-muted) !important; }
+
+/* ── Legends group ──────────────────────────────────────── */
+.legends-group {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.legend-swatch-circle {
+  border-radius: 50%;
+}
+
+/* ── POI Tooltip (dark) ─────────────────────────────────── */
+.poi-tooltip {
+  background: var(--bg-surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-sm) !important;
+  box-shadow: var(--shadow-badge) !important;
+  padding: 6px 10px !important;
+  font-family: var(--font-ui) !important;
+  color: var(--text-primary) !important;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.poi-tooltip::before {
+  border-top-color: var(--bg-surface) !important;
+}
+
+.poi-tooltip-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.poi-tooltip-sub {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+/* ── POI Popup ──────────────────────────────────────────── */
+.poi-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.poi-popup-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.poi-popup-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.poi-popup-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.poi-popup-cat {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+.poi-popup-address {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
 }

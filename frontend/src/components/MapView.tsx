@@ -4,9 +4,11 @@ import {
   TileLayer,
   CircleMarker,
   Popup,
+  Tooltip,
+  useMap,
 } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { type NodeData } from "../types/Node";
 import L, { LatLng, Layer } from "leaflet";
 import type {
@@ -20,243 +22,306 @@ import MapClickHandler from "./MapClickHandler.tsx";
 import {
   type AccessibilityPolygonCollection,
   type AccessibilityPolygonProperties,
+  type PoiFeatureCollection,
+  type PoiProperties,
   fetchPolygonAccessibility,
+  fetchPoisForIsochrone,
+  POI_COLORS,
 } from "../api/nodes";
 
+// ── Types ──────────────────────────────────────────────────────────
 interface MapViewProps {
   nodes: NodeData[];
+  onResult: (result: IsochroneResult | null) => void;
+  onLoading: (loading: boolean) => void;
 }
 
-// type PoiProperties = {
-//   kind: "origin" | "poi";
-//   group: string;
-//   tag: string;
-//   name: string;
-//   distance_m: number;
-// };
+export interface IsochroneResult {
+  origin_node: number;
+  lat: number;
+  lon: number;
+  score: number;
+  colour: string;
+  distance_m: number;
+}
 
-function MapView({ nodes }: MapViewProps) {
-  const [data, setData] = useState<FeatureCollection<
+// Score label helper
+const SCORE_LABELS: Record<number, string> = {
+  0: "No walkable amenities",
+  1: "Very poor walkability",
+  2: "Poor walkability",
+  3: "Below average",
+  4: "Average walkability",
+  5: "Good walkability",
+  6: "Excellent — true 15-min city",
+};
+
+// ── Fly-to helper ──────────────────────────────────────────────────
+function FlyTo({ lat, lon }: { lat: number; lon: number }) {
+  const map = useMap();
+  useEffect(() => {
+    map.flyTo([lat, lon], map.getZoom(), { animate: true, duration: 0.8 });
+  }, [lat, lon, map]);
+  return null;
+}
+
+// ── Component ──────────────────────────────────────────────────────
+function MapView({ nodes, onResult, onLoading }: MapViewProps) {
+  const [isoData, setIsoData] = useState<FeatureCollection<
     Polygon | MultiPolygon
   > | null>(null);
-  // const [poiData, setPoiData] =
-  //   useState<FeatureCollection<Point, PoiProperties> | null>(null);
+
   const [polygonData, setPolygonData] =
     useState<AccessibilityPolygonCollection | null>(null);
 
+  const [poiData, setPoiData] = useState<PoiFeatureCollection | null>(null);
+
+  const [clickMarker, setClickMarker] = useState<{
+    lat: number;
+    lng: number;
+  } | null>(null);
+
+  const geoJsonKey = useRef(0);
+  const poiKey = useRef(0);
+
+  // Load background accessibility polygons on mount
   useEffect(() => {
     async function loadPolygonData() {
       try {
         const data = await fetchPolygonAccessibility();
         setPolygonData(data);
       } catch (error) {
-        console.error(error);
+        console.error("Failed to load polygon accessibility:", error);
       }
     }
     loadPolygonData();
   }, []);
 
-  const geojson: FeatureCollection<Point> = {
-    type: "FeatureCollection",
-    features: nodes.map((node) => ({
-      type: "Feature",
-      geometry: {
-        type: "Point",
-        coordinates: [node.lon, node.lat],
-      },
-      properties: {
-        grocery_time: node.grocery_time,
-        accessible: node.accessible,
-      },
-    })),
-  };
-
-  const pointToLayer = (feature: Feature<Point>, latlng: LatLng) => {
-    const accessible = feature.properties?.accessible;
-
-    console.log("latlng:", latlng);
-    return L.circleMarker(latlng, {
-      radius: 4,
-      color: accessible ? "green" : "red",
-      fillOpacity: 0.8,
-    });
-  };
-
-  const onEachFeature = (feature: Feature<Point>, layer: Layer) => {
-    if (feature.properties && "bindPopup" in layer) {
-      (layer as L.CircleMarker).bindPopup(
-        `Grocery Time: ${feature.properties.grocery_time} sec`,
-      );
-    }
-  };
-
-  // const colorByGroup: Record<string, string> = {
-  //   origin: "red",
-  //   amenity: "#1d4ed8",
-  //   shop: "#15803d",
-  //   leisure: "#ea580c",
-  //   other: "#4b5563",
-  // };
-
-  // const poiPointToLayer = (
-  //   feature: Feature<Point, PoiProperties>,
-  //   latlng: LatLng
-  // ) => {
-  //   const group = feature.properties?.group ?? "other";
-  //   const kind = feature.properties?.kind;
-  //   const color = colorByGroup[group] ?? colorByGroup.other;
-
-  //   return L.circleMarker(latlng, {
-  //     radius: kind === "origin" ? 8 : 5,
-  //     color,
-  //     fillColor: color,
-  //     fillOpacity: 0.9,
-  //     weight: kind === "origin" ? 3 : 2,
-  //   });
-  // };
-
-  // const onEachPoiFeature = (
-  //   feature: Feature<Point, PoiProperties>,
-  //   layer: Layer
-  // ) => {
-  //   if (!feature.properties || !("bindTooltip" in layer)) {
-  //     return;
-  //   }
-  //   const { kind, name, tag, distance_m } = feature.properties;
-  //   const label =
-  //     kind === "origin"
-  //       ? name
-  //       : `${name} (${tag.replace("_", " ")}) - ${distance_m} m`;
-
-  //   (layer as L.CircleMarker).bindTooltip(label, {
-  //     sticky: true,
-  //     direction: "top",
-  //   });
-  // };
-
+  // ── Map click handler ────────────────────────────────────────────
   const handleClick = async (lat: number, lng: number) => {
-    console.log("Clicked at:", lat, lng);
+    setClickMarker({ lat, lng });
+    onLoading(true);
+    onResult(null);
+    setIsoData(null);
+    setPoiData(null);
 
-    const response = await fetch("http://localhost:8000/isochrone", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ lat, lng }),
-    });
-    if (!response.ok) {
-      throw new Error("Failed to fetch POIs");
+    try {
+      const response = await fetch("http://localhost:8000/isochrone", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lat, lng }),
+      });
+
+      if (!response.ok) throw new Error("Backend error");
+
+      const data: FeatureCollection<Polygon | MultiPolygon> =
+        await response.json();
+
+      geoJsonKey.current += 1;
+      setIsoData(data);
+
+      if (data.features.length > 0) {
+        const props = data.features[0].properties as IsochroneResult;
+        onResult(props);
+
+        // Fetch POIs inside this isochrone
+        try {
+          const pois = await fetchPoisForIsochrone(props.origin_node);
+          poiKey.current += 1;
+          setPoiData(pois);
+        } catch (poiErr) {
+          console.error("Failed to fetch POIs:", poiErr);
+        }
+      }
+    } catch (err) {
+      console.error("Isochrone fetch failed:", err);
+      onResult(null);
+    } finally {
+      onLoading(false);
     }
-    const data = await response.json();
-    setData(data);
-    // setPoiData(data);
   };
 
-  useEffect(() => {
-    console.log("DATA RECEIVED:", data);
-  }, [data]);
-
+  // ── Styles ────────────────────────────────────────────────────────
   const polygonStyle = (
-    feature?: Feature<Polygon | MultiPolygon, AccessibilityPolygonProperties>,
+    feature?: Feature<Polygon | MultiPolygon, AccessibilityPolygonProperties>
   ) => {
     const color = feature?.properties?.color ?? "#475569";
+    return { color, fillColor: color, fillOpacity: 0.3, weight: 1 };
+  };
+
+  const isoStyle = (feature?: Feature<Polygon | MultiPolygon>) => {
+    const colour = feature?.properties?.colour ?? "#58a6ff";
     return {
-      color,
-      fillColor: color,
-      fillOpacity: 0.35,
-      weight: 1.5,
+      color: colour,
+      fillColor: colour,
+      fillOpacity: 0.45,
+      weight: 2.5,
     };
   };
 
-  const onEachPolygonFeature = (
-    feature: Feature<Polygon | MultiPolygon, AccessibilityPolygonProperties>,
-    layer: Layer,
+  // ── GeoJSON node layer (subtle background dots) ───────────────────
+  const pointToLayer = (_feature: Feature, latlng: LatLng) =>
+    L.circleMarker(latlng, {
+      radius: 3,
+      color: "#58a6ff",
+      fillColor: "#58a6ff",
+      fillOpacity: 0.5,
+      weight: 0,
+    });
+
+  // ── Popup for clicked isochrone ───────────────────────────────────
+  const onEachIsoFeature = (
+    feature: Feature<Polygon | MultiPolygon>,
+    layer: Layer
   ) => {
-    if (!feature.properties || !("bindPopup" in layer)) {
-      return;
-    }
-
-    // const { accessibility_percent, accessible_groups, missing_groups, group_counts } =
-    //   feature.properties;
-
-    // const accessibleLabel = accessible_groups.length
-    //   ? accessible_groups.join(", ")
-    //   : "none";
-    // const missingLabel = missing_groups.length ? missing_groups.join(", ") : "none";
-    // const countsLabel = Object.entries(group_counts)
-    //   .map(([group, count]) => `${group}: ${count}`)
-    //   .join("<br/>");
-
-    // (layer as L.Path).bindPopup(
-    //   `<b>Accessibility:</b> ${accessibility_percent}%<br/>
-    //    <b>Available:</b> ${accessibleLabel}<br/>
-    //    <b>Missing:</b> ${missingLabel}<br/>
-    //    <b>POI counts:</b><br/>${countsLabel}`
-    // );
+    if (!feature.properties) return;
+    const { score, colour, distance_m, origin_node } =
+      feature.properties as IsochroneResult;
+    const label = SCORE_LABELS[score] ?? "Unknown";
+    (layer as L.Path).bindPopup(
+      `<div class="popup-score-row">
+        <div class="popup-dot" style="background:${colour}"></div>
+        <b style="color:${colour}">Score ${score}/6</b>
+      </div>
+      <div class="popup-label">${label}</div>
+      <div style="margin-top:6px; display:flex; gap:8px; flex-wrap:wrap;">
+        <span class="meta-chip">Node <span>${origin_node}</span></span>
+        <span class="meta-chip">~<span>${Math.round(distance_m)} m</span> away</span>
+      </div>`,
+      { maxWidth: 240 }
+    );
   };
+
+  const isoResult = isoData?.features[0]?.properties as
+    | IsochroneResult
+    | undefined;
 
   return (
     <MapContainer
       center={[18.5308, 73.8475]}
       zoom={14}
       style={{ height: "100vh", width: "100%" }}
+      zoomControl={true}
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
+      {/* Background accessibility layer */}
       {polygonData && (
-        <GeoJSON
-          data={polygonData}
-          style={polygonStyle}
-          onEachFeature={onEachPolygonFeature}
-        />
+        <GeoJSON data={polygonData} style={polygonStyle} />
       )}
 
-      {nodes.length > 0 && (
+      {/* Background node dots */}
+      {nodes.length > 0 && nodes.length < 2000 && (
         <GeoJSON
-          data={geojson}
+          data={{
+            type: "FeatureCollection" as const,
+            features: nodes.map((n) => ({
+              type: "Feature" as const,
+              geometry: {
+                type: "Point" as const,
+                coordinates: [n.lon, n.lat],
+              },
+              properties: n,
+            })),
+          }}
           pointToLayer={pointToLayer}
-          onEachFeature={onEachFeature}
         />
       )}
 
-      {/* {poiData && (
+      {/* Clicked isochrone polygon */}
+      {isoData && (
         <GeoJSON
-          data={poiData}
-          pointToLayer={poiPointToLayer}
-          onEachFeature={onEachPoiFeature}
-        />
-      )} */}
-
-      {data && (
-        <GeoJSON
-          data={data}
-          style={(feature?: Feature<Polygon | MultiPolygon>) => ({
-            color: feature?.properties?.colour ?? "#64748b",
-            fillColor: feature?.properties?.colour ?? "#64748b",
-            fillOpacity: 0.5,
-            weight: 1,
-          })}
+          key={geoJsonKey.current}
+          data={isoData}
+          style={isoStyle}
+          onEachFeature={onEachIsoFeature}
         />
       )}
 
-      {data &&
-        data.features
-          .filter((feature) => feature.properties)
-          .map((feature, index) => (
+      {/* POI markers inside isochrone */}
+      {poiData &&
+        poiData.features.map((feature) => {
+          const props = feature.properties as PoiProperties;
+          const [lon, lat] = feature.geometry.coordinates;
+          const color = POI_COLORS[props.category] ?? POI_COLORS.other;
+          const subtypeLabel = props.subtype
+            .replace(/_/g, " ")
+            .replace(/\b\w/g, (c) => c.toUpperCase());
+
+          return (
             <CircleMarker
-              key={index}
-              center={[feature.properties!.lat, feature.properties!.lon]}
+              key={`poi-${props.poi_id}`}
+              center={[lat, lon]}
+              radius={6}
+              pathOptions={{
+                color: "#161b22",
+                fillColor: color,
+                fillOpacity: 0.9,
+                weight: 1.5,
+              }}
             >
-              <Popup>Origin Node {index + 1}</Popup>
+              <Tooltip
+                direction="top"
+                offset={[0, -8]}
+                className="poi-tooltip"
+                sticky
+              >
+                <span className="poi-tooltip-name">{props.name}</span>
+                <span className="poi-tooltip-sub">{subtypeLabel}</span>
+              </Tooltip>
+              <Popup>
+                <div className="poi-popup">
+                  <div className="poi-popup-header">
+                    <div
+                      className="poi-popup-dot"
+                      style={{ background: color }}
+                    />
+                    <div>
+                      <div className="poi-popup-name">{props.name}</div>
+                      <div className="poi-popup-cat">
+                        {props.category} · {subtypeLabel}
+                      </div>
+                    </div>
+                  </div>
+                  {props.address && (
+                    <div className="poi-popup-address">📍 {props.address}</div>
+                  )}
+                </div>
+              </Popup>
             </CircleMarker>
-          ))}
+          );
+        })}
+
+      {/* Pulse marker at click point */}
+      {clickMarker && (
+        <CircleMarker
+          center={[clickMarker.lat, clickMarker.lng]}
+          radius={7}
+          pathOptions={{
+            color: "#58a6ff",
+            fillColor: "#58a6ff",
+            fillOpacity: 0.9,
+            weight: 2,
+          }}
+        >
+          <Popup>
+            <span style={{ fontSize: 12, color: "#8b949e" }}>
+              {clickMarker.lat.toFixed(5)}, {clickMarker.lng.toFixed(5)}
+            </span>
+          </Popup>
+        </CircleMarker>
+      )}
+
+      {/* Fly to result */}
+      {isoResult && <FlyTo lat={isoResult.lat} lon={isoResult.lon} />}
 
       <MapClickHandler onClick={handleClick} />
     </MapContainer>
   );
 }
 
+export { SCORE_LABELS };
 export default MapView;

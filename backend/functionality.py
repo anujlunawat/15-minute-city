@@ -33,6 +33,8 @@ def _get_tag_info(row) -> tuple[str, str]:
         data["travel_time"] = data["length"] / constants.WALKING_SPEED
 
     return G
+
+
 def _get_point(geometry):
     if geometry is None or geometry.is_empty:
         return None
@@ -44,8 +46,6 @@ def _get_point(geometry):
 def _distance_meters(origin_lat, origin_lon, lat, lon) -> float:
     return float(ox.distance.great_circle(origin_lat, origin_lon, lat, lon))
 
-# def main(G, lat, lon):
-#     node = get_node(G, lat, lon)
 
 def _serialize_for_frontend(geodf, lat, lon):
     features = [

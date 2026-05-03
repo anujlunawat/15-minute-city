@@ -23,7 +23,10 @@ from pathlib import Path
 BASE_FOLDER = Path(__file__).resolve().parent.parent 
 FILES_FOLDER = BASE_FOLDER / "files"
 DB_NAME = "accessibility.db"
-DB_PATH = BASE_FOLDER/ "backend" / DB_NAME
+DB_PATH = BASE_FOLDER / "backend" / DB_NAME
+
+DUCKDB_NAME = "accessibility.duckdb"
+DUCKDB_PATH = BASE_FOLDER / "backend" / DUCKDB_NAME
 
 feather_folder = FILES_FOLDER / "feather_files"
 feather_folder.mkdir(exist_ok=True)
