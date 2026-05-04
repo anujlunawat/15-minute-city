@@ -1,0 +1,12 @@
+fastapi==0.135.1
+geopandas==1.1.2
+networkx==3.4.2
+osmnx==2.1.0
+pandas==3.0.1
+pydantic==2.12.5
+pyproj==3.7.1
+Shapely==2.1.2
+scipy==1.15.3
+duckdb>=1.1.0
+# uvicorn==0.41.0
+# fiona==1.10.1

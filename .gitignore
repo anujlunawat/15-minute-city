@@ -1,0 +1,11 @@
+accesibility.db
+backend/accesibility.db
+cache
+
+files/city_data.gpkg
+
+frontend/.env
+.env
+
+files/city_data.gpkg
+files/gpkg/isochrones.gpkg
