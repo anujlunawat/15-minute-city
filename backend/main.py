@@ -6,9 +6,9 @@ from shapely import wkt as shapely_wkt
 
 import math
 
-import backend.db as duckdb_layer
-import backend.constants as constants
-from backend.models import ClickPoint
+import db as duckdb_layer
+import constants as constants
+from models import ClickPoint
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────

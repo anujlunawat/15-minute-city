@@ -1,7 +1,7 @@
 import { type NodeData } from "../types/Node";
 import type { FeatureCollection, MultiPolygon, Point, Polygon } from "geojson";
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
+const API_BASE = import.meta.env.VITE_API_BASE ;
 
 // ── Score labels ───────────────────────────────────────────────────────────────
 export const SCORE_LABELS: Record<number, string> = {

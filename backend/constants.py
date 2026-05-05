@@ -20,14 +20,14 @@ projected_crs="EPSG:32643"
 geographic_crs="EPSG:4326"
 
 from pathlib import Path
-BASE_FOLDER = Path(__file__).resolve().parent.parent
-FILES_FOLDER = BASE_FOLDER / "files"
+BASE_FOLDER = Path(__file__).resolve().parent
+FILES_FOLDER = BASE_FOLDER.parent / "files"
 
 DUCKDB_NAME = "accessibility.duckdb"
-DUCKDB_PATH = BASE_FOLDER / "backend" / DUCKDB_NAME
+DUCKDB_PATH = BASE_FOLDER / DUCKDB_NAME
 
 feather_folder = FILES_FOLDER / "feather_files"
-feather_folder.mkdir(exist_ok=True)
+# feather_folder.mkdir(exist_ok=True)
 
 _city_data_gpkg_filename = "city_data.gpkg"
 _isochrones_gpkg_filename = "isochrones.gpkg"

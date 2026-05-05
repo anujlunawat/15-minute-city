@@ -11,7 +11,7 @@ Requires: duckdb >= 1.1.0 with the spatial extension.
 
 import json
 import duckdb
-import backend.constants as constants
+import constants
 
 # ── Persistent read-only connection (opened once at API startup) ───────────────
 _persistent_conn: duckdb.DuckDBPyConnection | None = None

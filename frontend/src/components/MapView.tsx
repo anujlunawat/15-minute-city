@@ -113,6 +113,20 @@ function MapView({
       .catch((e) => console.error("Failed to load polygon accessibility:", e));
   }, []);
 
+  // Check URL hash on initial load
+  useEffect(() => {
+    const hash = window.location.hash.slice(1);
+    if (hash) {
+      const [latStr, lngStr] = hash.split(',');
+      const lat = parseFloat(latStr);
+      const lng = parseFloat(lngStr);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        handleClick(lat, lng);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ── Map click ────────────────────────────────────────────────────────────────
   const handleClick = async (lat: number, lng: number) => {
     setClickMarker({ lat, lng });
@@ -234,7 +248,7 @@ function MapView({
               geometry: { type: "Point" as const, coordinates: [n.lon, n.lat] },
               properties: n,
             })),
-          }}
+          } as FeatureCollection}
           pointToLayer={pointToLayer}
         />
       )}
