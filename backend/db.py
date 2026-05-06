@@ -389,6 +389,72 @@ def fetch_nearest_isochrone(lat: float, lon: float) -> dict | None:
     }
 
 
+def fetch_city_summary() -> dict:
+    """
+    Return city-wide overview: average score, score distribution, and POI category weakness.
+    """
+    conn = get_conn()
+    
+    # 1. Average score and total count
+    stats = conn.execute("SELECT AVG(score), COUNT(*) FROM isochrones").fetchone()
+    avg_score = round(stats[0], 2) if stats and stats[0] is not None else 0.0
+    total_isochrones = stats[1] if stats else 0
+
+    # 2. Score distribution
+    dist_rows = conn.execute("""
+        SELECT score, COUNT(*) as cnt 
+        FROM isochrones 
+        GROUP BY score 
+        ORDER BY score
+    """).fetchall()
+    
+    distribution = {}
+    for r in dist_rows:
+        score = r[0] if r[0] is not None else 0
+        cnt = r[1]
+        percentage = round((cnt / total_isochrones) * 100, 1) if total_isochrones > 0 else 0.0
+        distribution[str(score)] = percentage
+
+    # 3. Category Weakness (Spatial Join)
+    # Get the % of isochrones that contain at least one POI of a given category.
+    category_rows = conn.execute("""
+        SELECT p.category, COUNT(DISTINCT i.origin_node) as isochrone_coverage
+        FROM pois p
+        JOIN isochrones i ON ST_Within(p.geom, i.geom)
+        GROUP BY p.category
+    """).fetchall()
+    
+    category_coverage = {}
+    for r in category_rows:
+        cat = r[0]
+        cov_cnt = r[1]
+        percentage = round((cov_cnt / total_isochrones) * 100, 1) if total_isochrones > 0 else 0.0
+        category_coverage[cat] = percentage
+
+    return {
+        "average_score": avg_score,
+        "total_isochrones": total_isochrones,
+        "score_distribution": distribution,
+        "category_coverage": category_coverage
+    }
+
+
+def fetch_population_for_node(origin_node: int) -> int:
+    """Fetch the precomputed total population living within a specific isochrone."""
+    conn = get_conn()
+    try:
+        res = conn.execute('''
+            SELECT population 
+            FROM isochrones 
+            WHERE origin_node = ?
+        ''', [origin_node]).fetchone()
+        
+        return int(res[0]) if res and res[0] else 0
+    except Exception as e:
+        print(f"Error fetching precomputed population: {e}")
+        return 0
+
+
 # ── CLI ────────────────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":

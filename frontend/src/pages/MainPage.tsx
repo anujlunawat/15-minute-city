@@ -163,6 +163,11 @@ function MainPage() {
                   <span className="meta-chip">
                     Score <span>{result.score} / 6</span>
                   </span>
+                  {summary?.population !== undefined && (
+                    <span className="meta-chip" style={{ background: "rgba(88, 166, 255, 0.15)", borderColor: "rgba(88, 166, 255, 0.3)" }}>
+                      Pop. <span style={{ color: "var(--accent)" }}>{summary.population.toLocaleString()}</span>
+                    </span>
+                  )}
                 </div>
 
                 {/* POI category summary */}

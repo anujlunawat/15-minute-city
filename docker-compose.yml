@@ -13,7 +13,7 @@ services:
       # Mount the duckdb file so data persists even if the container restarts
       - ./backend:/app
       - ./backend/requirements.txt:/app/requirements.txt
-      - ./backend/accessibility.duckdb:/app/accessibility.duckdb
+      - ./backend/accessibility_temp.duckdb:/app/accessibility.duckdb
     environment:
       - ENVIRONMENT=production
 

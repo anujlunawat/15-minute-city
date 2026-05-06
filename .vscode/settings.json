@@ -1,0 +1,19 @@
+{
+  "workbench.editorAssociations": {
+    "*.copilotmd": "vscode.markdown.preview.editor",
+    "*.parquet": "duckdb.dataFileViewer",
+    "*.csv": "duckdb.dataFileViewer",
+    "*.tsv": "duckdb.dataFileViewer",
+    "*.xlsx": "duckdb.dataFileViewer"
+  },
+  "duckdb.databases": [
+    {
+      "alias": "accessibility",
+      "type": "file",
+      "path": "d:\\15-min-city-2\\backend\\accessibility.duckdb",
+      "readOnly": true,
+      "attached": true
+    }
+  ],
+  "duckdb.defaultDatabase": "accessibility"
+}

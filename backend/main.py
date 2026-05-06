@@ -145,6 +145,20 @@ async def get_poi_summary(origin_node: int):
     """
     try:
         summary = duckdb_layer.fetch_poi_summary_for_node(origin_node)
+        population = duckdb_layer.fetch_population_for_node(origin_node)
+        summary["population"] = population
         return JSONResponse(content=summary)
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Database error: {e}")
+
+
+@app.get("/city-summary")
+def get_city_summary():
+    """
+    Return overarching city-wide walkability statistics:
+    average score, percentage distribution of scores, and missing POI categories.
+    """
+    try:
+        return duckdb_layer.fetch_city_summary()
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"Database error: {e}")

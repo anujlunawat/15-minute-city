@@ -1,5 +1,5 @@
 """
-Here, we create two version
+Here, we create two versions.
 """
 
 

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>15-Minute City Auditor | Poster</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent-1: #00f2fe;
+            --accent-2: #4facfe;
+            --accent-3: #8b5cf6;
+            --text-main: #f8fafc;
+            --text-muted: #cbd5e1;
+            --card-bg: rgba(15, 23, 42, 0.45);
+            --card-border: rgba(255, 255, 255, 0.06);
+            --glass-blur: blur(20px);
+        }
+
+        body {
+            margin: 0;
+            padding: 3rem;
+            background: linear-gradient(-45deg, #020617, #0f172a, #1e1b4b, #0f172a);
+            background-size: 400% 400%;
+            animation: gradientBG 20s ease infinite;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .poster-container {
+            width: 100%;
+            max-width: 1800px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2.5rem;
+            grid-auto-rows: auto;
+        }
+
+        .header {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: 24px;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--accent-1), var(--accent-3), var(--accent-2));
+        }
+
+        .header h1 {
+            font-size: 4.5rem;
+            font-weight: 800;
+            margin: 0 0 1rem 0;
+            background: linear-gradient(135deg, #ffffff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1.5px;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .header h2 {
+            font-size: 2rem;
+            color: var(--accent-1);
+            margin: 0;
+            font-weight: 400;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        .col {
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: var(--glass-blur);
+            -webkit-backdrop-filter: var(--glass-blur);
+            border-radius: 20px;
+            padding: 2.5rem;
+            border: 1px solid var(--card-border);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at top right, rgba(255,255,255,0.03), transparent 50%);
+            pointer-events: none;
+        }
+
+        .card:hover {
+            transform: translateY(-5px) scale(1.01);
+            border-color: rgba(0, 242, 254, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 242, 254, 0.1);
+        }
+
+        .card h3 {
+            font-size: 1.8rem;
+            color: #ffffff;
+            margin-top: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 1.2rem;
+            margin-bottom: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .card h3 span {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 242, 254, 0.1);
+            border-radius: 10px;
+            color: var(--accent-1);
+            font-size: 1.2rem;
+        }
+
+        p, li {
+            line-height: 1.8;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+        }
+
+        ul {
+            padding-left: 1.5rem;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        li::marker {
+            color: var(--accent-1);
+        }
+
+        li strong {
+            color: #f8fafc;
+            font-weight: 600;
+        }
+
+        .diagram-container {
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+            box-shadow: inset 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 1.5rem;
+            background: rgba(0,0,0,0.15);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        th, td {
+            padding: 1.2rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+        
+        th {
+            background: rgba(255, 255, 255, 0.02);
+            color: var(--text-main);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1.5px;
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-align: center;
+            min-width: 45px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .score-0 { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+        .score-1 { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+        .score-3 { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+        .score-5 { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+        .score-6 { 
+            background: rgba(168, 85, 247, 0.2); 
+            color: #d8b4fe; 
+            border: 1px solid rgba(168,85,247,0.5);
+            box-shadow: 0 0 20px rgba(168,85,247,0.3);
+        }
+
+        .abstract-box {
+            position: relative;
+            padding: 1.5rem 2rem;
+            font-size: 1.15rem;
+            font-style: italic;
+            background: linear-gradient(90deg, rgba(0, 242, 254, 0.05), transparent);
+            border-radius: 0 12px 12px 0;
+            border-left: 4px solid var(--accent-1);
+            color: #e2e8f0;
+            line-height: 1.8;
+        }
+        
+        .abstract-box::before {
+            content: '"';
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            font-size: 4rem;
+            color: rgba(0, 242, 254, 0.15);
+            font-family: serif;
+        }
+        
+        /* For printing/scaling */
+        @media (max-width: 1400px) {
+            .poster-container { grid-template-columns: repeat(2, 1fr); }
+            .header h1 { font-size: 3.5rem; }
+        }
+        @media (max-width: 900px) {
+            .poster-container { grid-template-columns: 1fr; }
+            .header h1 { font-size: 2.8rem; }
+            body { padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="poster-container">
+    <!-- Header -->
+    <header class="header">
+        <h1>15-Minute City Auditor</h1>
+        <h2>Quantifying Urban Accessibility</h2>
+    </header>
+
+    <!-- Column 1 -->
+    <div class="col">
+        <!-- Abstract -->
+        <div class="card">
+            <h3><span>✦</span> Abstract</h3>
+            <div class="abstract-box">
+                The "15-Minute City" is an urban planning concept where essential services (groceries, healthcare, education, parks) are accessible within a 15-minute walk or cycle from any given point. This project is a global spatial analytics and visualization tool designed to audit urban areas worldwide. For this demonstration, we use Pune, Maharashtra as a case study. By leveraging graph-based network routing and spatial database queries, the 15-Minute City Auditor calculates realistic walking catchment areas (isochrones) and scores neighborhoods based on their proximity to basic daily needs, shifting the perspective from geographical distance to true human accessibility.
+            </div>
+        </div>
+
+        <!-- Objective -->
+        <div class="card">
+            <h3><span>🎯</span> Objective</h3>
+            <ul>
+                <li><strong>Measure True Accessibility:</strong> Move beyond straight-line "as-the-crow-flies" distance and calculate realistic walking times based on actual street networks.</li>
+                <li><strong>Identify Infrastructure Gaps:</strong> Highlight neighborhoods that lack essential amenities, providing data-driven insights into urban inequality.</li>
+                <li><strong>Interactive Visualization:</strong> Provide citizens and planners with an interactive web interface to explore walkability scores, view isochrones, and discover nearby Points of Interest (POIs).</li>
+                <li><strong>Technical Demonstration:</strong> Showcase a modern, lightweight spatial stack using DuckDB's spatial extension for fast, on-the-fly geospatial processing.</li>
+            </ul>
+        </div>
+        
+        <!-- Conclusion -->
+        <div class="card">
+            <h3><span>🏁</span> Conclusion</h3>
+            <p>The 15-Minute City Auditor effectively translates an abstract urban planning concept into a tangible, measurable, and interactive tool. By analyzing exactly what is reachable within a short walk, the project highlights the stark differences in neighborhood convenience and urban design. It proves that modern, lightweight tools like DuckDB can power complex spatial analysis, ultimately helping us rethink how our cities are built and how our daily time is spent.</p>
+        </div>
+    </div>
+
+    <!-- Column 2 -->
+    <div class="col">
+        <!-- Methodology -->
+        <div class="card" style="flex: 1;">
+            <h3><span>⚙️</span> Methodology & Workflow</h3>
+            <p>The system models the city as a network of nodes and edges (roads). For a given location, it calculates a 15-minute walking boundary, cross-references it with POI data, and assigns an accessibility score.</p>
+            <div class="diagram-container">
+                <div class="mermaid">
+flowchart TD
+    A([User Clicks Map]) --> B[Frontend API Call]
+    B --> C{FastAPI Backend}
+    
+    subgraph Spatial[DuckDB Spatial Processing]
+        C -->|ST_Distance| D[(Fetch Closest Node)]
+        D --> E[Retrieve Isochrone]
+        E --> F[ST_Within: Find POIs]
+        F --> G[Aggregate Categories]
+    end
+    
+    G --> H{Calculate Score}
+    H --> I[Return GeoJSON]
+    I --> J([Render Map Layers])
+    
+    classDef default fill:#1e293b,stroke:#334155,stroke-width:2px,color:#f8fafc;
+    classDef startend fill:#0f172a,stroke:#00f2fe,stroke-width:2px,color:#00f2fe;
+    classDef backend fill:#1e293b,stroke:#4facfe,stroke-width:2px,color:#4facfe;
+    classDef db fill:#1e1b4b,stroke:#8b5cf6,stroke-width:2px,color:#d8b4fe;
+    class A,J startend;
+    class C,H backend;
+    class D,E,F,G db;
+    style Spatial fill:#0f172a,stroke:#334155,stroke-dasharray: 5 5,color:#94a3b8
+                </div>
+            </div>
+        </div>
+
+        <!-- System Architecture -->
+        <div class="card" style="flex: 1;">
+            <h3><span>🏗️</span> System Architecture</h3>
+            <p>The project is containerized using Docker and follows a decoupled client-server architecture, relying on DuckDB for heavy geospatial lifting.</p>
+            <div class="diagram-container">
+                <div class="mermaid">
+flowchart LR
+    subgraph Client [Frontend Layer]
+        direction TB
+        UI[React UI]
+        Map[Leaflet Maps]
+        UI --- Map
+    end
+    
+    subgraph API [Backend Layer]
+        FastAPI[FastAPI Server]
+    end
+    
+    subgraph DB [Data Layer]
+        Duck[DuckDB + Spatial]
+    end
+    
+    Client <-->|REST| API
+    API <-->|SQL| DB
+    
+    classDef client fill:#0f172a,stroke:#00f2fe,stroke-width:2px,color:#f8fafc;
+    classDef api fill:#0f172a,stroke:#4facfe,stroke-width:2px,color:#f8fafc;
+    classDef db fill:#0f172a,stroke:#8b5cf6,stroke-width:2px,color:#f8fafc;
+    
+    class Client,UI,Map client;
+    class API,FastAPI api;
+    class DB,Duck db;
+    style Client fill:transparent,stroke:#334155,stroke-dasharray: 5 5,color:#94a3b8
+    style API fill:transparent,stroke:#334155,stroke-dasharray: 5 5,color:#94a3b8
+    style DB fill:transparent,stroke:#334155,stroke-dasharray: 5 5,color:#94a3b8
+                </div>
+            </div>
+            <ul style="margin-top: 1.5rem;">
+                <li><strong>Frontend:</strong> React + Vite, deployed on Nginx. Maps via Leaflet.</li>
+                <li><strong>Backend:</strong> Python + FastAPI. High-performance async endpoints.</li>
+                <li><strong>Database:</strong> DuckDB with Spatial Extension (`accessibility.duckdb`).</li>
+                <li><strong>Infrastructure:</strong> Docker Compose for seamless multi-container deployment.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Column 3 -->
+    <div class="col">
+        <!-- Result Analysis -->
+        <div class="card">
+            <h3><span>📊</span> Result Analysis (Pune Case Study)</h3>
+            <p>The auditor evaluates neighborhoods based on the presence of 6 essential POI categories: <strong>Grocery, Healthcare, Pharmacy, School, Park, and Public Transport</strong>. By overlaying the Kontur Population density grid with walkability scores, we determine the actual human impact of urban accessibility.</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Score</th>
+                        <th>Walkability</th>
+                        <th>Population Impact</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><div class="badge score-0">0</div></td>
+                        <td><strong>Car Dependent</strong></td>
+                        <td><strong>47.0%</strong> (5.74M) - No services.</td>
+                    </tr>
+                    <tr>
+                        <td><div class="badge score-1">1-2</div></td>
+                        <td><strong>Poor</strong></td>
+                        <td><strong>8.5%</strong> (1.03M) - Missing essentials.</td>
+                    </tr>
+                    <tr>
+                        <td><div class="badge score-3">3-4</div></td>
+                        <td><strong>Average</strong></td>
+                        <td><strong>16.1%</strong> (1.96M) - Lacking transit.</td>
+                    </tr>
+                    <tr>
+                        <td><div class="badge score-5">5</div></td>
+                        <td><strong>Good</strong></td>
+                        <td><strong>10.7%</strong> (1.30M) - Nearly complete.</td>
+                    </tr>
+                    <tr>
+                        <td><div class="badge score-6">6</div></td>
+                        <td><strong style="color: #d8b4fe;">True 15-Min City</strong></td>
+                        <td><strong>17.7%</strong> (2.15M) - All needs met.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div style="margin-top: 1.5rem; padding: 1rem 1.5rem; background: rgba(168, 85, 247, 0.05); border-left: 3px solid var(--accent-3); border-radius: 0 8px 8px 0;">
+                <p style="margin: 0; color: #e2e8f0;"><strong>The "Aha!" Moment:</strong> While only <strong>2.5%</strong> of Pune's land area achieves a perfect Score 6, its high density means it successfully houses <strong>17.7%</strong> of the total population!</p>
+            </div>
+        </div>
+
+        <!-- Future Scope -->
+        <div class="card" style="flex: 1;">
+            <h3><span>🚀</span> Future Scope</h3>
+            <ul>
+                <li><strong>Multi-Modal Routing:</strong> Introduce cycling and public transit catchments, not just walking.</li>
+                <li><strong>Equity & Demographics:</strong> Overlay census and demographic data to analyze whether low-income neighborhoods suffer from poorer accessibility.</li>
+                <li><strong>Topography Adjustments:</strong> Account for elevation changes (hills) which significantly affect real-world walking times.</li>
+                <li><strong>Live Data Integration:</strong> Pull live GTFS (General Transit Feed Specification) data for accurate public transport scheduling.</li>
+                <li><strong>Streamline Global Pipelines:</strong> Automate the data ingestion pipeline to rapidly onboard OSM and population data for any new city worldwide.</li>
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+<!-- Load Mermaid -->
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ 
+        startOnLoad: true, 
+        theme: 'dark',
+        fontFamily: 'Inter',
+        securityLevel: 'loose'
+    });
+</script>
+
+</body>
+</html>

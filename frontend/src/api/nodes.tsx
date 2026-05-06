@@ -1,7 +1,7 @@
 import { type NodeData } from "../types/Node";
 import type { FeatureCollection, MultiPolygon, Point, Polygon } from "geojson";
 
-const API_BASE = import.meta.env.VITE_API_BASE ;
+const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8000";
 
 // ── Score labels ───────────────────────────────────────────────────────────────
 export const SCORE_LABELS: Record<number, string> = {
@@ -68,7 +68,17 @@ export type PoiProperties = {
 
 export type PoiFeatureCollection = FeatureCollection<Point, PoiProperties>;
 
-export type PoiSummary = Partial<Record<string, number>> & { total?: number };
+export type PoiSummary = Partial<Record<string, number>> & {
+  total?: number;
+  population?: number;
+};
+
+export type CitySummary = {
+  average_score: number;
+  total_isochrones: number;
+  score_distribution: Record<string, number>;
+  category_coverage: Record<string, number>;
+};
 
 // ── Fetch functions ────────────────────────────────────────────────────────────
 export async function fetchNodes(): Promise<NodeData[]> {
@@ -84,7 +94,7 @@ export async function fetchPolygonAccessibility(): Promise<AccessibilityPolygonC
 }
 
 export async function fetchPoisForIsochrone(
-  originNode: number
+  originNode: number,
 ): Promise<PoiFeatureCollection> {
   const r = await fetch(`${API_BASE}/isochrone-pois/${originNode}`);
   if (!r.ok) throw new Error("Failed to fetch POIs for isochrone");
@@ -97,8 +107,14 @@ export async function fetchPoiSummary(originNode: number): Promise<PoiSummary> {
   return r.json();
 }
 
+export async function fetchCitySummary(): Promise<CitySummary> {
+  const r = await fetch(`${API_BASE}/city-summary`);
+  if (!r.ok) throw new Error("Failed to fetch city summary");
+  return r.json();
+}
+
 export async function geocodeAddress(
-  query: string
+  query: string,
 ): Promise<{ lat: number; lon: number; display_name: string }[]> {
   const params = new URLSearchParams({
     q: query,
@@ -108,7 +124,7 @@ export async function geocodeAddress(
   });
   const r = await fetch(
     `https://nominatim.openstreetmap.org/search?${params}`,
-    { headers: { "Accept-Language": "en" } }
+    { headers: { "Accept-Language": "en" } },
   );
   if (!r.ok) throw new Error("Geocode failed");
   const data = await r.json();
