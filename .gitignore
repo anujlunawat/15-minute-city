@@ -9,4 +9,5 @@ frontend/.env
 
 files/city_data.gpkg
 files/gpkg/isochrones.gpkg
-# files/kontur_population_IN_20231101.gpkg
+files/kontur_population_IN_20231101.gpkg
+kontur_population_IN_20231101.gpkg
