@@ -4,7 +4,7 @@ import os
 import sys
 
 def process():
-    root = Path("d:/15-min-city-2")
+    root = Path("d:/15-min-city-2/files")
     kontur_path = root / "kontur_population_IN_20231101.gpkg"
     boundary_path = root / "files/pune_boundary.geojson"
     output_path = root / "files/pune_population.gpkg"
